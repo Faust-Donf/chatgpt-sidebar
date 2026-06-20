@@ -65,7 +65,7 @@ Clone this repository into your Codex skills directory:
 
 ```bash
 mkdir -p ~/.codex/skills
-git clone https://github.com/Faust-Donf/obsidian_repo.git ~/.codex/skills/obsidian-web-mcp
+git clone https://github.com/Faust-Donf/chatgpt-obsidian-repo.git ~/.codex/skills/obsidian-web-mcp
 ```
 
 Start a new Codex session so the skill is discovered.
