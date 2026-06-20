@@ -16,6 +16,7 @@ jobs:
           test -f SKILL.md
           test -f agents/openai.yaml
           test -f references/repo-layout.md
+          test -f assets/cover.png
           python3 - <<'PY'
           from pathlib import Path
           text = Path("SKILL.md").read_text()

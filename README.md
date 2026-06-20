@@ -1,76 +1,162 @@
 # Obsidian Web MCP Skill
 
-A Codex skill for setting up an Obsidian vault with:
+![Obsidian Web MCP cover](assets/cover.png)
 
-- a desktop ChatGPT web sidebar community plugin
-- a vault-scoped MCP server
-- ngrok tunneling for ChatGPT remote MCP access
-- safe read/write/delete/move vault tools
-- restart and security runbooks
+Turn an Obsidian vault into a ChatGPT-ready working environment: a desktop ChatGPT web sidebar, a vault-scoped MCP server, ngrok remote access, and safe file tools for reading, writing, deleting, and organizing notes.
 
-This repository is a skill package, not an Obsidian plugin distribution and not a vault backup.
+This repository is a **Codex skill package**. It teaches Codex how to set up the workflow end to end. It is not a vault backup, not an Obsidian plugin marketplace package, and not a ChatGPT automation scraper.
 
-## What This Skill Helps Codex Do
+## Why This Exists
 
-Use this skill when you want Codex to:
+Obsidian is a strong local knowledge base. ChatGPT is a strong reasoning interface. The missing piece is a practical bridge that lets ChatGPT work with a vault without turning the setup into a pile of one-off scripts.
 
-- configure an Obsidian desktop community plugin that embeds the ChatGPT website
-- avoid OpenAI API usage and ChatGPT DOM automation
-- build a local MCP server for an Obsidian vault
-- expose that MCP server with ngrok
-- add controlled vault mutation tools
-- document restart steps after shutdown
-- prepare a clean GitHub repository without committing secrets
+This skill captures that bridge as a repeatable workflow:
 
-## Install
+- install a ChatGPT web sidebar inside Obsidian desktop
+- scaffold a clean vault structure
+- expose the vault through an MCP server
+- tunnel the server with ngrok for ChatGPT remote MCP
+- keep secrets and local state out of GitHub
+- document restart, verification, and safety steps
 
-Copy this skill folder into your Codex skills directory:
+## What Codex Can Build With This Skill
+
+### ChatGPT Web Sidebar
+
+An Obsidian community plugin that opens `https://chatgpt.com` in a desktop sidebar.
+
+It deliberately does not:
+
+- call the OpenAI API
+- scrape ChatGPT responses
+- inject scripts into ChatGPT
+- automate login, CAPTCHA, clicks, or sending
+- sync ChatGPT history
+
+### Vault MCP Server
+
+A local MCP server based on `Faust-Donf/chatgpt-mcp-server-template`, using Express, the official MCP SDK, SSE transport, and ChatGPT-compatible OAuth/DCR shims.
+
+The server can expose controlled vault tools:
+
+| Tool | Purpose |
+|---|---|
+| `get_vault_structure` | Inspect vault layout |
+| `list_vault_files` | List exposed files with pagination |
+| `read_vault_file` | Read a text-like file |
+| `search_vault` | Search notes with line previews |
+| `write_vault_file` | Create or overwrite a file with explicit `overwrite=true` |
+| `append_vault_file` | Append content to a file |
+| `delete_vault_file` | Delete one file with explicit `confirm=true` |
+| `move_vault_path` | Move or rename files/directories |
+| `create_vault_directory` | Create folders for organization |
+
+### ngrok Remote Access
+
+The skill includes the runbook for exposing the local MCP server through ngrok and connecting ChatGPT to:
+
+```text
+https://<ngrok-host>/sse?token=<MCP_ACCESS_TOKEN>
+```
+
+## Install The Skill
+
+Clone this repository into your Codex skills directory:
 
 ```bash
 mkdir -p ~/.codex/skills
 git clone https://github.com/Faust-Donf/obsidian_repo.git ~/.codex/skills/obsidian-web-mcp
 ```
 
-Restart Codex or start a new session so the skill is discovered.
+Start a new Codex session so the skill is discovered.
 
-## Trigger Example
+## Trigger It
+
+Use a prompt like:
 
 ```text
 Use obsidian-web-mcp to set up this Obsidian vault with a ChatGPT web sidebar and an ngrok-exposed MCP server.
 ```
 
-## Skill Contents
+Other useful prompts:
+
+```text
+Use obsidian-web-mcp to add write/delete/move MCP tools to this vault safely.
+```
+
+```text
+Use obsidian-web-mcp to document how to restart the Obsidian MCP server after shutdown.
+```
+
+```text
+Use obsidian-web-mcp to prepare this Obsidian MCP setup for GitHub without committing secrets.
+```
+
+## Repository Contents
 
 ```text
 obsidian-web-mcp/
-├── SKILL.md
+├── SKILL.md                 # Main workflow used by Codex
+├── README.md                # Human-facing project page
+├── LICENSE
+├── CONTRIBUTING.md
 ├── agents/
-│   └── openai.yaml
-└── references/
-    └── repo-layout.md
+│   └── openai.yaml          # UI metadata
+├── references/
+│   └── repo-layout.md       # Recommended vault/repo layout
+└── assets/
+    └── cover.png            # README cover image
 ```
 
-## Safety Boundaries
+## Safety Model
 
-The skill instructs Codex to:
+The skill tells Codex to keep these boundaries:
 
-- not use the OpenAI API for the sidebar plugin
-- not scrape, inject into, or automate ChatGPT DOM
-- not commit `.env`, ngrok tokens, cookies, plugin session state, or vault-local chat histories
-- keep MCP access inside the vault
+- never commit `.env`, ngrok tokens, MCP tokens, cookies, or plugin session state
+- keep MCP file access inside the target vault
 - exclude `.git`, `.obsidian`, `mcp-server`, `node_modules`, `.env`, and cache files from MCP exposure
-- require explicit confirmation flags for overwrite/delete operations
+- require explicit flags for destructive operations
+- keep ChatGPT tool execution set to ask before running
+- avoid ChatGPT DOM scraping and automation
 
-## Validation
+This matters because a remote MCP tunnel can expose local files if it is built casually. The skill biases toward explicit tools, path guards, token auth, and restart documentation.
 
-Run the bundled skill validator from your local Codex install:
+## Typical Output
+
+After Codex uses this skill on a vault, the target project usually has:
+
+```text
+.obsidian/plugins/chatgpt-web-sidebar/
+mcp-server/
+raw/
+wiki/
+AGENT.md
+README.md
+```
+
+The MCP server has its own:
+
+```text
+mcp-server/.env.example
+mcp-server/package.json
+mcp-server/src/
+mcp-server/README.md
+```
+
+The real `.env` stays local and ignored by Git.
+
+## Validate
+
+Run the local skill validator:
 
 ```bash
 python3 ~/.codex/skills/.system/skill-creator/scripts/quick_validate.py ~/.codex/skills/obsidian-web-mcp
 ```
 
-This repository also includes a GitHub Actions workflow that checks basic skill metadata on every push.
+This repository also runs a lightweight GitHub Actions workflow on every push to verify the skill package shape.
 
-## Notes
+## Status
 
-This skill documents a workflow. It does not include secrets, a live ngrok tunnel, an Obsidian vault, or generated `node_modules`.
+This skill is opinionated and practical. It is designed for personal/local Obsidian workflows where you understand the risk of exposing a local MCP server through a public tunnel.
+
+Use private repositories and rotate tokens if you share URLs or screenshots.
