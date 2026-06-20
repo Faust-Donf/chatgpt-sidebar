@@ -1,0 +1,28 @@
+{
+  "name": "obsidian-repo-mcp-server",
+  "version": "0.1.0",
+  "description": "MCP server for exposing this Obsidian vault over SSE for ChatGPT MCP clients.",
+  "type": "module",
+  "main": "dist/index.js",
+  "scripts": {
+    "dev": "tsx src/index.ts",
+    "build": "tsc --noEmit",
+    "start": "tsx src/index.ts",
+    "tunnel": "ngrok http 3000",
+    "print-token-url": "node scripts/print-token-url.mjs",
+    "inspect": "npx @modelcontextprotocol/inspector"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.0.1",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "express": "^4.21.1"
+  },
+  "devDependencies": {
+    "@types/cors": "^2.8.17",
+    "@types/express": "^5.0.0",
+    "@types/node": "^22.9.0",
+    "tsx": "^4.19.2",
+    "typescript": "^5.6.3"
+  }
+}

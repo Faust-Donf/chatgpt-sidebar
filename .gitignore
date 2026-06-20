@@ -1,0 +1,22 @@
+# Obsidian 工作区配置（频繁变动）
+.obsidian/workspace.json
+.obsidian/workspace-mobile.json
+
+# Obsidian 插件缓存
+.obsidian/plugins/*/data.json
+.obsidian/plugins/*/sessions/
+
+# MCP server secrets and dependencies
+mcp-server/.env
+mcp-server/node_modules/
+mcp-server/dist/
+node_modules/
+
+# 系统文件
+.DS_Store
+Thumbs.db
+
+# 临时文件
+*.tmp
+*.temp
+wiki/test/

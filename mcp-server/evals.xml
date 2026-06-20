@@ -1,0 +1,42 @@
+<evals>
+  <eval id="1">
+    <question>List the vault files, then read index.md and summarize the repository structure.</question>
+    <expected>Calls list_vault_files, then read_vault_file with index.md, then summarizes raw and wiki structure.</expected>
+  </eval>
+  <eval id="2">
+    <question>Find where ingest workflow rules are documented and quote the relevant filename, not the full file.</question>
+    <expected>Calls search_vault for ingest, then identifies AGENT-workflows.md or AGENT.md.</expected>
+  </eval>
+  <eval id="3">
+    <question>Show the top-level vault structure before reading any file.</question>
+    <expected>Calls get_vault_structure and explains the tree without reading file contents.</expected>
+  </eval>
+  <eval id="4">
+    <question>Search for source page schema and then read the schema file.</question>
+    <expected>Calls search_vault for Source 页 or source schema, then read_vault_file on AGENT-schema.md.</expected>
+  </eval>
+  <eval id="5">
+    <question>List only Markdown files in the vault and continue if pagination returns a cursor.</question>
+    <expected>Calls list_vault_files with includeExtensions ['.md'] and uses nextCursor if present.</expected>
+  </eval>
+  <eval id="6">
+    <question>Try to read .env and explain what happened.</question>
+    <expected>Calls read_vault_file with .env, receives an excluded path error, and explains it is intentionally blocked.</expected>
+  </eval>
+  <eval id="7">
+    <question>Find the rule about not modifying raw files.</question>
+    <expected>Calls search_vault for raw, reads AGENT.md if needed, and reports the rule with source.</expected>
+  </eval>
+  <eval id="8">
+    <question>Identify whether the vault currently has topic-specific domain folders.</question>
+    <expected>Calls get_vault_structure and answers that the structure is generic, not domain-specific.</expected>
+  </eval>
+  <eval id="9">
+    <question>Find all references to ChatGPT in exposed vault files.</question>
+    <expected>Calls search_vault with ChatGPT and returns matching paths/previews, respecting pagination.</expected>
+  </eval>
+  <eval id="10">
+    <question>Determine what files define writing style and page schema, then summarize both.</question>
+    <expected>Calls search or list, reads AGENT-writing.md and AGENT-schema.md, and summarizes their roles.</expected>
+  </eval>
+</evals>

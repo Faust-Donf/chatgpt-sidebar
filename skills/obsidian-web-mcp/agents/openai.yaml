@@ -1,0 +1,4 @@
+interface:
+  display_name: "Obsidian Web MCP"
+  short_description: "Set up Obsidian web sidebar plugins and vault MCP servers."
+  default_prompt: "Set up an Obsidian vault with the ChatGPT web sidebar plugin and an ngrok-exposed MCP server."

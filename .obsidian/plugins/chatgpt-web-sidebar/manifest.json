@@ -1,0 +1,10 @@
+{
+  "id": "chatgpt-web-sidebar",
+  "name": "ChatGPT Web Sidebar",
+  "version": "0.1.0",
+  "minAppVersion": "1.5.0",
+  "description": "Open the ChatGPT website in an Obsidian desktop sidebar. No OpenAI API, scraping, or automation.",
+  "author": "Local development",
+  "authorUrl": "",
+  "isDesktopOnly": true
+}

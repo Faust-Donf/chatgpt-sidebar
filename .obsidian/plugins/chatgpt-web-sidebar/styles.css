@@ -1,0 +1,106 @@
+.chatgpt-web-sidebar-container {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  width: 100%;
+  overflow: hidden;
+}
+
+.chatgpt-web-sidebar-toolbar {
+  align-items: center;
+  border-bottom: 1px solid var(--background-modifier-border);
+  display: flex;
+  flex: 0 0 auto;
+  gap: 4px;
+  min-height: 36px;
+  padding: 4px 6px;
+}
+
+.chatgpt-web-sidebar-toolbar-button {
+  align-items: center;
+  display: inline-flex;
+  height: 28px;
+  justify-content: center;
+  min-width: 28px;
+  padding: 0 6px;
+}
+
+.chatgpt-web-sidebar-toolbar-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.45;
+}
+
+.chatgpt-web-sidebar-status {
+  color: var(--text-muted);
+  flex: 1 1 auto;
+  font-size: var(--font-ui-smaller);
+  overflow: hidden;
+  padding-left: 6px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.chatgpt-web-sidebar-content {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  min-height: 0;
+  overflow: hidden;
+  position: relative;
+  width: 100%;
+}
+
+.chatgpt-web-sidebar-webview,
+.chatgpt-web-sidebar-iframe {
+  border: 0;
+  flex: 1 1 auto;
+  height: 100%;
+  min-height: 0;
+  width: 100%;
+}
+
+.chatgpt-web-sidebar-warning {
+  background: var(--background-modifier-warning);
+  border-bottom: 1px solid var(--background-modifier-border);
+  color: var(--text-normal);
+  flex: 0 0 auto;
+  font-size: var(--font-ui-smaller);
+  line-height: 1.4;
+  padding: 8px 10px;
+}
+
+.chatgpt-web-sidebar-fallback {
+  color: var(--text-normal);
+  line-height: 1.5;
+  margin: 0 auto;
+  max-width: 520px;
+  overflow: auto;
+  padding: 24px 18px;
+  width: 100%;
+}
+
+.chatgpt-web-sidebar-fallback h3 {
+  font-size: var(--font-ui-large);
+  margin: 0 0 10px;
+}
+
+.chatgpt-web-sidebar-fallback p {
+  margin: 8px 0;
+}
+
+.chatgpt-web-sidebar-fallback button {
+  margin-top: 12px;
+}
+
+.chatgpt-web-sidebar-iframe-note {
+  border-top: 1px solid var(--background-modifier-border);
+  flex: 0 0 auto;
+  max-width: none;
+  padding: 10px;
+}
+
+.chatgpt-web-sidebar-settings-note {
+  color: var(--text-muted);
+  font-size: var(--font-ui-smaller);
+  margin-top: 18px;
+}
