@@ -1,0 +1,28 @@
+name: Validate Skill
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Validate skill files
+        run: |
+          test -f SKILL.md
+          test -f agents/openai.yaml
+          test -f references/repo-layout.md
+          python3 - <<'PY'
+          from pathlib import Path
+          text = Path("SKILL.md").read_text()
+          assert text.startswith("---\n"), "SKILL.md must start with YAML frontmatter"
+          assert "\nname: obsidian-web-mcp\n" in text, "missing skill name"
+          assert "\ndescription:" in text, "missing skill description"
+          assert "MCP_ACCESS_TOKEN" in text, "missing MCP token guidance"
+          assert "ngrok" in text.lower(), "missing ngrok guidance"
+          print("skill metadata ok")
+          PY

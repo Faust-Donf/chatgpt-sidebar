@@ -1,0 +1,5 @@
+.DS_Store
+*.tmp
+*.temp
+.env
+node_modules/
