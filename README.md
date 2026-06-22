@@ -1,37 +1,46 @@
 # ChatGPT Sidebar
 
+[![GitHub stars](https://img.shields.io/github/stars/Faust-Donf/chatgpt-sidebar?style=social)](https://github.com/Faust-Donf/chatgpt-sidebar/stargazers)
+[![GitHub forks](https://img.shields.io/github/forks/Faust-Donf/chatgpt-sidebar?style=social)](https://github.com/Faust-Donf/chatgpt-sidebar/forks)
+[![Validate](https://github.com/Faust-Donf/chatgpt-sidebar/actions/workflows/validate.yml/badge.svg)](https://github.com/Faust-Donf/chatgpt-sidebar/actions/workflows/validate.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
+[![Codex Skill](https://img.shields.io/badge/Codex-Skill-blue)](SKILL.md)
+[![Obsidian](https://img.shields.io/badge/Obsidian-Vault-7C3AED)](https://obsidian.md)
+[![MCP](https://img.shields.io/badge/MCP-Remote%20Tools-111827)](https://modelcontextprotocol.io)
+
 ![Obsidian Web MCP cover](assets/cover.png)
 
 把 Obsidian vault 变成 ChatGPT 可直接使用的本地知识工作台：桌面端 ChatGPT 侧边栏、vault 级 MCP server、ngrok 远程访问，以及安全的文件读取、写入、删除和整理工具。
 
-This repository is a **Codex skill package**. It teaches Codex how to set up the workflow end to end. It is not a vault backup, not an Obsidian plugin marketplace package, and not a ChatGPT automation scraper.
+ChatGPT Sidebar is a **Codex skill package** for setting up an Obsidian + ChatGPT workflow end to end. It is not a vault backup, not an Obsidian marketplace plugin package, and not a ChatGPT automation scraper.
 
 ## 中文导读
 
-`chatgpt-sidebar` 面向想把 ChatGPT 和 Obsidian 长期知识库连起来的人。它不是把你的 vault 直接上传到 GitHub，而是提供一套可复用的安装和维护流程：
+`chatgpt-sidebar` 面向想把 ChatGPT 和 Obsidian 长期知识库连起来的人。它提供一套可复用的安装和维护流程，让 Codex 能在目标 vault 中搭好：
 
-- 在 Obsidian 桌面端安装 ChatGPT 网页侧边栏。
-- 为 vault 创建清晰的 `raw/`、`wiki/`、`mcp-server/` 结构。
-- 通过 MCP server 让 ChatGPT 读取、搜索和整理 vault 文件。
-- 用 ngrok 把本地 MCP server 暴露给 ChatGPT 远程 MCP。
-- 默认保护 `.git`、`.obsidian`、`.env`、插件缓存和 token。
+- Obsidian 桌面端 ChatGPT 网页侧边栏。
+- 清晰的 `raw/`、`wiki/`、`mcp-server/` 知识库结构。
+- 让 ChatGPT 读取、搜索和整理 vault 文件的 MCP server。
+- 通过 ngrok 暴露给 ChatGPT 远程 MCP 的连接方式。
+- 默认保护 `.git`、`.obsidian`、`.env`、插件缓存、cookies 和 token 的安全边界。
 
-这个 README 借鉴了热门 Obsidian 项目的常见写法：先说明项目解决什么问题，再给出安装方式、功能边界、仓库结构、验证命令和安全模型。
+这个 README 借鉴了热门 Obsidian 项目的常见写法：先说明项目价值，再给出安装、触发方式、功能边界、仓库结构、验证命令和安全模型。
 
-## Why This Exists
+## Why It Matters
 
-Obsidian is a strong local knowledge base. ChatGPT is a strong reasoning interface. The missing piece is a practical bridge that lets ChatGPT work with a vault without turning the setup into a pile of one-off scripts.
+Obsidian is great for long-lived knowledge. ChatGPT is great for reasoning and synthesis. The awkward part is the bridge between them: browser tabs, manual copying, random scripts, ngrok URLs, MCP auth, and a lot of small things that are easy to forget.
 
-This skill captures that bridge as a repeatable workflow:
+This skill turns that bridge into a repeatable setup:
 
-- install a ChatGPT web sidebar inside Obsidian desktop
-- scaffold a clean vault structure
-- expose the vault through an MCP server
-- tunnel the server with ngrok for ChatGPT remote MCP
-- keep secrets and local state out of GitHub
-- document restart, verification, and safety steps
+| Need | What this skill sets up |
+|---|---|
+| Use ChatGPT while writing in Obsidian | Desktop ChatGPT web sidebar |
+| Let ChatGPT inspect a vault | Vault-scoped MCP read tools |
+| Let ChatGPT organize notes | Explicit write, append, move, delete tools |
+| Connect ChatGPT to local files | ngrok + token-protected SSE endpoint |
+| Avoid leaking local state | Git ignores, path guards, secret boundaries |
 
-## What Codex Can Build With This Skill
+## What Codex Can Build
 
 ### ChatGPT Web Sidebar
 
@@ -71,6 +80,24 @@ The skill includes the runbook for exposing the local MCP server through ngrok a
 https://<ngrok-host>/sse?token=<MCP_ACCESS_TOKEN>
 ```
 
+## Who This Is For
+
+Use this if you want:
+
+- a personal Obsidian knowledge base that ChatGPT can search and update
+- a reproducible setup instead of scattered one-off scripts
+- a local-first workflow where vault files stay on your machine
+- explicit read/write tools instead of broad filesystem access
+- a documented restart path for MCP and ngrok
+
+This is not for:
+
+- syncing ChatGPT conversation history automatically
+- bypassing ChatGPT login, rate limits, CAPTCHA, or browser checks
+- publishing a full Obsidian vault backup
+- scraping ChatGPT web content
+- replacing the official Obsidian plugin publishing flow
+
 ## Install The Skill
 
 Clone this repository into your Codex skills directory:
@@ -104,10 +131,34 @@ Use obsidian-web-mcp to document how to restart the Obsidian MCP server after sh
 Use obsidian-web-mcp to prepare this Obsidian MCP setup for GitHub without committing secrets.
 ```
 
+## Typical Output
+
+After Codex uses this skill on a vault, the target project usually has:
+
+```text
+.obsidian/plugins/chatgpt-web-sidebar/
+mcp-server/
+raw/
+wiki/
+AGENT.md
+README.md
+```
+
+The MCP server has its own:
+
+```text
+mcp-server/.env.example
+mcp-server/package.json
+mcp-server/src/
+mcp-server/README.md
+```
+
+The real `.env` stays local and ignored by Git.
+
 ## Repository Contents
 
 ```text
-obsidian-web-mcp/
+chatgpt-sidebar/
 ├── SKILL.md                 # Main workflow used by Codex
 ├── README.md                # Human-facing project page
 ├── LICENSE
@@ -133,30 +184,6 @@ The skill tells Codex to keep these boundaries:
 
 This matters because a remote MCP tunnel can expose local files if it is built casually. The skill biases toward explicit tools, path guards, token auth, and restart documentation.
 
-## Typical Output
-
-After Codex uses this skill on a vault, the target project usually has:
-
-```text
-.obsidian/plugins/chatgpt-web-sidebar/
-mcp-server/
-raw/
-wiki/
-AGENT.md
-README.md
-```
-
-The MCP server has its own:
-
-```text
-mcp-server/.env.example
-mcp-server/package.json
-mcp-server/src/
-mcp-server/README.md
-```
-
-The real `.env` stays local and ignored by Git.
-
 ## Validate
 
 Run the local skill validator:
@@ -166,6 +193,10 @@ python3 ~/.codex/skills/.system/skill-creator/scripts/quick_validate.py ~/.codex
 ```
 
 This repository also runs a lightweight GitHub Actions workflow on every push to verify the skill package shape.
+
+## Star History
+
+[![Star History Chart](https://api.star-history.com/svg?repos=Faust-Donf/chatgpt-sidebar&type=Date)](https://www.star-history.com/#Faust-Donf/chatgpt-sidebar&Date)
 
 ## Status
 
