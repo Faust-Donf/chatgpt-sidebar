@@ -1,10 +1,22 @@
-# Obsidian Web MCP Skill
+# ChatGPT Sidebar
 
 ![Obsidian Web MCP cover](assets/cover.png)
 
-Turn an Obsidian vault into a ChatGPT-ready working environment: a desktop ChatGPT web sidebar, a vault-scoped MCP server, ngrok remote access, and safe file tools for reading, writing, deleting, and organizing notes.
+把 Obsidian vault 变成 ChatGPT 可直接使用的本地知识工作台：桌面端 ChatGPT 侧边栏、vault 级 MCP server、ngrok 远程访问，以及安全的文件读取、写入、删除和整理工具。
 
 This repository is a **Codex skill package**. It teaches Codex how to set up the workflow end to end. It is not a vault backup, not an Obsidian plugin marketplace package, and not a ChatGPT automation scraper.
+
+## 中文导读
+
+`chatgpt-sidebar` 面向想把 ChatGPT 和 Obsidian 长期知识库连起来的人。它不是把你的 vault 直接上传到 GitHub，而是提供一套可复用的安装和维护流程：
+
+- 在 Obsidian 桌面端安装 ChatGPT 网页侧边栏。
+- 为 vault 创建清晰的 `raw/`、`wiki/`、`mcp-server/` 结构。
+- 通过 MCP server 让 ChatGPT 读取、搜索和整理 vault 文件。
+- 用 ngrok 把本地 MCP server 暴露给 ChatGPT 远程 MCP。
+- 默认保护 `.git`、`.obsidian`、`.env`、插件缓存和 token。
+
+这个 README 借鉴了热门 Obsidian 项目的常见写法：先说明项目解决什么问题，再给出安装方式、功能边界、仓库结构、验证命令和安全模型。
 
 ## Why This Exists
 
@@ -65,7 +77,7 @@ Clone this repository into your Codex skills directory:
 
 ```bash
 mkdir -p ~/.codex/skills
-git clone https://github.com/Faust-Donf/chatgpt-obsidian-repo.git ~/.codex/skills/obsidian-web-mcp
+git clone https://github.com/Faust-Donf/chatgpt-sidebar.git ~/.codex/skills/obsidian-web-mcp
 ```
 
 Start a new Codex session so the skill is discovered.

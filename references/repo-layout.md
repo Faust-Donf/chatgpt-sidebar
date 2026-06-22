@@ -1,4 +1,4 @@
-# Obsidian Web MCP Repository Layout
+# ChatGPT Sidebar Repository Layout
 
 Recommended root files:
 

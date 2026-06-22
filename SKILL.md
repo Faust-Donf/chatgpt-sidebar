@@ -3,7 +3,7 @@ name: obsidian-web-mcp
 description: Set up or maintain an Obsidian vault with a desktop ChatGPT web sidebar community plugin and a vault-scoped MCP server exposed through ngrok. Use when asked to configure Obsidian plugins, install or update a ChatGPT web sidebar, expose an Obsidian vault to ChatGPT/MCP, add read/write vault tools, configure ngrok tunneling, document restart workflows, or prepare/push the resulting GitHub repository.
 ---
 
-# Obsidian Web MCP
+# ChatGPT Sidebar / Obsidian Web MCP
 
 ## Core Boundaries
 
