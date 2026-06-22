@@ -14,6 +14,12 @@
 
 ChatGPT Sidebar is a **Codex skill package** for setting up an Obsidian + ChatGPT workflow end to end. It is not a vault backup, not an Obsidian marketplace plugin package, and not a ChatGPT automation scraper.
 
+## Workspace Preview
+
+![Obsidian graph view with ChatGPT MCP sidebar](assets/obsidian-chatgpt-workspace.png)
+
+The intended workflow is visible in one screen: Obsidian keeps the graph, files, and long-term notes on the left, while ChatGPT uses MCP tools on the right to inspect and organize the vault.
+
 ## 中文导读
 
 `chatgpt-sidebar` 面向想把 ChatGPT 和 Obsidian 长期知识库连起来的人。它提供一套可复用的安装和维护流程，让 Codex 能在目标 vault 中搭好：
