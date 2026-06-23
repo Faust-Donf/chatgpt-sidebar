@@ -10,7 +10,7 @@
 
 ![Obsidian Web MCP cover](assets/cover.png)
 
-把 Obsidian vault 变成 ChatGPT 可直接使用的本地知识工作台：桌面端 ChatGPT 侧边栏、vault 级 MCP server、ngrok 远程访问，以及安全的文件读取、写入、删除和整理工具。
+把 Obsidian vault 变成 ChatGPT 可直接使用的本地知识工作台：桌面端 ChatGPT 侧边栏、vault 级 MCP server、ngrok 远程访问、安全的文件读写工具，以及可选的 Agent Reach-backed 外部资料发现与读取工具。
 
 ChatGPT Sidebar is a **Codex skill package** for setting up an Obsidian + ChatGPT workflow end to end. It is not a vault backup, not an Obsidian marketplace plugin package, and not a ChatGPT automation scraper.
 
@@ -27,6 +27,7 @@ The intended workflow is visible in one screen: Obsidian keeps the graph, files,
 - Obsidian 桌面端 ChatGPT 网页侧边栏。
 - 清晰的 `raw/`、`wiki/`、`mcp-server/` 知识库结构。
 - 让 ChatGPT 读取、搜索和整理 vault 文件的 MCP server。
+- 可选的外部学习工具：网页搜索、GitHub 搜索、YouTube 搜索/字幕、RSS 阅读、网页正文读取。
 - 通过 ngrok 暴露给 ChatGPT 远程 MCP 的连接方式。
 - 默认保护 `.git`、`.obsidian`、`.env`、插件缓存、cookies 和 token 的安全边界。
 
@@ -43,6 +44,7 @@ This skill turns that bridge into a repeatable setup:
 | Use ChatGPT while writing in Obsidian | Desktop ChatGPT web sidebar |
 | Let ChatGPT inspect a vault | Vault-scoped MCP read tools |
 | Let ChatGPT organize notes | Explicit write, append, move, delete tools |
+| Let ChatGPT discover new knowledge | Web, GitHub, YouTube, RSS discovery tools |
 | Connect ChatGPT to local files | ngrok + token-protected SSE endpoint |
 | Avoid leaking local state | Git ignores, path guards, secret boundaries |
 
@@ -77,6 +79,33 @@ The server can expose controlled vault tools:
 | `delete_vault_file` | Delete one file with explicit `confirm=true` |
 | `move_vault_path` | Move or rename files/directories |
 | `create_vault_directory` | Create folders for organization |
+| `runtime_context` | Return MCP server date, time, timezone, and runtime user |
+
+The server can also expose optional Agent Reach-backed discovery tools:
+
+| Tool | Purpose |
+|---|---|
+| `agent_reach_status` | Diagnose Agent Reach and upstream CLI availability |
+| `web_search` | Search web sources, with optional hostname restriction |
+| `github_search` | Search GitHub repositories through `gh` |
+| `youtube_search` | Search YouTube videos through `yt-dlp` |
+| `rss_read` | Read RSS or Atom feeds |
+| `read_url` | Read one HTTP(S) page through Jina Reader or direct fallback |
+| `youtube_transcript` | Extract YouTube subtitles or auto-subtitles |
+
+This is intentionally not arbitrary shell access. ChatGPT Web calls narrow MCP tools; those tools run in the MCP server runtime and call Agent Reach or upstream CLIs only through fixed handlers.
+
+### Learning Workflow
+
+With the optional discovery tools enabled, ChatGPT can follow this loop:
+
+```text
+discover: web_search / github_search / youtube_search / rss_read
+read:     read_url / youtube_transcript
+write:    write_vault_file / append_vault_file
+```
+
+For time-sensitive prompts such as "latest", "recent", "today", or "this year", ChatGPT should first call `runtime_context()` to get the MCP server's current date, year, and timezone. This avoids relying on stale model memory.
 
 ### ngrok Remote Access
 
@@ -91,6 +120,7 @@ https://<ngrok-host>/sse?token=<MCP_ACCESS_TOKEN>
 Use this if you want:
 
 - a personal Obsidian knowledge base that ChatGPT can search and update
+- a way for ChatGPT to discover high-quality external sources and save distilled notes
 - a reproducible setup instead of scattered one-off scripts
 - a local-first workflow where vault files stay on your machine
 - explicit read/write tools instead of broad filesystem access
@@ -127,6 +157,10 @@ Other useful prompts:
 
 ```text
 Use obsidian-web-mcp to add write/delete/move MCP tools to this vault safely.
+```
+
+```text
+Use obsidian-web-mcp to add Agent Reach-backed web_search, youtube_search, rss_read, read_url, and youtube_transcript tools to this vault MCP server.
 ```
 
 ```text
@@ -185,6 +219,9 @@ The skill tells Codex to keep these boundaries:
 - keep MCP file access inside the target vault
 - exclude `.git`, `.obsidian`, `mcp-server`, `node_modules`, `.env`, and cache files from MCP exposure
 - require explicit flags for destructive operations
+- expose external discovery through narrow read-only MCP tools, not arbitrary shell
+- install Agent Reach only in the same user/container/machine runtime as the MCP server
+- use `runtime_context` before interpreting "latest" or "recent"
 - keep ChatGPT tool execution set to ask before running
 - avoid ChatGPT DOM scraping and automation
 

@@ -1,6 +1,6 @@
 ---
 name: obsidian-web-mcp
-description: Set up or maintain an Obsidian vault with a desktop ChatGPT web sidebar community plugin and a vault-scoped MCP server exposed through ngrok. Use when asked to configure Obsidian plugins, install or update a ChatGPT web sidebar, expose an Obsidian vault to ChatGPT/MCP, add read/write vault tools, configure ngrok tunneling, document restart workflows, or prepare/push the resulting GitHub repository.
+description: Set up or maintain an Obsidian vault with a desktop ChatGPT web sidebar community plugin and a vault-scoped MCP server exposed through ngrok. Use when asked to configure Obsidian plugins, install or update a ChatGPT web sidebar, expose an Obsidian vault to ChatGPT/MCP, add read/write vault tools, add Agent Reach-backed discovery tools, configure ngrok tunneling, document restart workflows, or prepare/push the resulting GitHub repository.
 ---
 
 # ChatGPT Sidebar / Obsidian Web MCP
@@ -12,6 +12,8 @@ description: Set up or maintain an Obsidian vault with a desktop ChatGPT web sid
 - Do not commit secrets, `.env`, ngrok tokens, cookies, plugin `data.json`, or vault-local session state.
 - Treat remote MCP over ngrok as sensitive: require an access token and keep mutation tools explicit.
 - Keep MCP path access inside the vault and exclude `.git`, `.obsidian`, `mcp-server`, `node_modules`, `.env`, and cache files.
+- Treat Agent Reach as a local CLI/config helper in the MCP server runtime, not as a ChatGPT plugin and not as an MCP endpoint.
+- Expose external internet access through narrow read-only MCP tools only. Do not expose arbitrary shell execution.
 
 ## Workflow
 
@@ -93,6 +95,7 @@ Default tools:
 - `list_vault_files`
 - `read_vault_file`
 - `search_vault`
+- `runtime_context`: current MCP server date, time, timezone, runtime user. Use this before interpreting "latest", "recent", "today", or "this year".
 
 Mutation tools may be added when requested:
 
@@ -101,6 +104,26 @@ Mutation tools may be added when requested:
 - `delete_vault_file`: require `confirm=true`; delete files only, not directories.
 - `move_vault_path`
 - `create_vault_directory`
+
+Optional external discovery/read tools may be added when the user wants ChatGPT to learn from high-quality external sources:
+
+- `agent_reach_status`: read-only diagnostics for Agent Reach and upstream CLIs.
+- `web_search(query, limit?, site?)`: search web sources, optionally restricted to a hostname such as `arxiv.org` or `modelcontextprotocol.io`.
+- `github_search(query, limit?)`: search repositories with `gh search repos`.
+- `youtube_search(query, limit?)`: search YouTube videos with `yt-dlp`.
+- `rss_read(feedUrl, limit?)`: read RSS or Atom feeds.
+- `read_url(url, maxChars?)`: read one HTTP(S) URL through Jina Reader when available, with a direct HTTP(S) fallback.
+- `youtube_transcript(url, languages?)`: extract subtitles or auto-subtitles with `yt-dlp`.
+
+These tools must return structured JSON. If Agent Reach or an upstream CLI is missing, return:
+
+```json
+{
+  "ok": false,
+  "error": "not_configured",
+  "message": "Agent Reach or required upstream CLI is not available in the MCP Server runtime."
+}
+```
 
 Generate `.env` locally:
 
@@ -119,6 +142,49 @@ ALLOWED_ORIGINS=
 ```
 
 Never print the token in final responses.
+
+### 3.1 Agent Reach And External Discovery Tools
+
+Install Agent Reach only in the same machine/container/user environment that runs the MCP server. Do not install it in an unrelated root shell, host user, or ChatGPT web environment.
+
+First identify the runtime:
+
+```bash
+ps aux | grep -E 'mcp-server|dist/index|tsx src/index|ngrok'
+id
+which agent-reach || true
+which yt-dlp || true
+which gh || true
+which mcporter || true
+```
+
+Prefer a dedicated virtual environment inside `<vault>/mcp-server/` when Python is externally managed:
+
+```bash
+cd <vault>/mcp-server
+python3.11 -m venv .venv-agent-reach
+.venv-agent-reach/bin/python -m pip install --upgrade pip
+.venv-agent-reach/bin/python -m pip install https://github.com/Panniantong/agent-reach/archive/main.zip
+.venv-agent-reach/bin/agent-reach install --env=auto --dry-run
+.venv-agent-reach/bin/agent-reach install --env=auto --safe
+PATH="$PWD/.venv-agent-reach/bin:$PATH" .venv-agent-reach/bin/agent-reach doctor
+```
+
+Add this to the vault root `.gitignore`:
+
+```gitignore
+mcp-server/.venv-agent-reach/
+```
+
+Implementation constraints:
+
+- Use `execFile` or equivalent argument-array execution for whitelisted CLIs. Do not use arbitrary shell strings.
+- Validate HTTP(S) URLs before fetching.
+- Validate YouTube hosts before calling `yt-dlp`.
+- Clamp limits such as search result count and returned content length.
+- Add timeouts and structured `upstream_error` responses.
+- For "recent/latest/current" tasks, the model must call `runtime_context()` first and use its `currentYear`, `localDate`, and `timeZone` to choose date filters.
+- External learning workflows should follow: discover with `web_search` / `github_search` / `youtube_search` / `rss_read`, read with `read_url` / `youtube_transcript`, then write source/concept/comparison/map notes to the vault.
 
 ### 4. ngrok Tunnel
 
@@ -165,6 +231,13 @@ Verify MCP with the SDK client when possible:
 
 - `client.listTools()` shows expected tool names.
 - `get_vault_structure` excludes `.git`, `.obsidian`, and `mcp-server`.
+- `runtime_context` returns current local date, timezone, and year.
+- `web_search` can find a high-signal source, for example an arXiv result.
+- `read_url` can read a selected URL or return a structured upstream error.
+- `github_search` returns repository results through `gh`.
+- `youtube_search` returns video URLs through `yt-dlp`.
+- `rss_read` returns entries from a known feed such as `https://hnrss.org/frontpage`.
+- `youtube_transcript` returns transcript text for a video with subtitles, or a structured `no_transcript` / `upstream_error`.
 - For mutation tools, create a temporary file under `raw/inbox`, append, read, move to `raw/archive`, delete it, then confirm no `.mcp-test-*` remains.
 
 Check ngrok:
@@ -188,6 +261,7 @@ Root `.gitignore` should exclude:
 mcp-server/.env
 mcp-server/node_modules/
 mcp-server/dist/
+mcp-server/.venv-agent-reach/
 node_modules/
 ```
 

@@ -1,4 +1,4 @@
 interface:
   display_name: "ChatGPT Sidebar"
-  short_description: "Set up Obsidian ChatGPT sidebars and vault MCP servers."
-  default_prompt: "Set up an Obsidian vault with the ChatGPT web sidebar plugin and an ngrok-exposed MCP server."
+  short_description: "Set up Obsidian ChatGPT sidebars, vault MCP servers, and optional discovery tools."
+  default_prompt: "Set up an Obsidian vault with the ChatGPT web sidebar plugin, an ngrok-exposed MCP server, and optional external discovery tools."
