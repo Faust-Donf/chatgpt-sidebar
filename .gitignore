@@ -10,6 +10,7 @@
 mcp-server/.env
 mcp-server/node_modules/
 mcp-server/dist/
+mcp-server/.venv-agent-reach/
 node_modules/
 
 # 系统文件

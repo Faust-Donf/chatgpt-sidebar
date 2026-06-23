@@ -15,8 +15,82 @@ It exposes this vault over MCP with controlled read/write tools. It does not exp
 - `delete_vault_file`: delete one file. Requires `confirm=true` and never deletes directories.
 - `move_vault_path`: move or rename a file or directory inside the vault.
 - `create_vault_directory`: create a directory inside the vault.
+- `write_vault_binary_file`: create or replace a binary attachment from base64 content. Prefer `raw/assets/`; existing files require `overwrite=true`.
+- `agent_reach_status`: read-only diagnostics for Agent Reach and its upstream CLIs in this MCP server runtime.
+- `read_url`: read one HTTP(S) URL through the configured web reader backend and return structured JSON.
+- `youtube_transcript`: extract subtitles or auto-subtitles from one YouTube URL through `yt-dlp`.
+- `github_search`: search GitHub repositories through the `gh` CLI.
+- `web_search`: search the web for learning sources, optionally restricted to one hostname.
+- `youtube_search`: search YouTube videos through `yt-dlp`.
+- `rss_read`: read recent entries from an RSS or Atom feed.
 
 Mutation tools are intentionally scoped to the vault and reject excluded directories. Keep ChatGPT tool execution set to ask before running.
+
+`write_vault_binary_file` accepts common attachment extensions such as PNG, JPG, WebP, GIF, SVG, PDF, ZIP, MP3, MP4, MOV, WAV, XLSX, DOCX, and PPTX. The default maximum decoded size is 25MB. It returns the written path, byte count, and SHA-256 hash so callers can verify the result.
+
+## Agent Reach wrapper tools
+
+Agent Reach is installed on the same machine and under the same runtime user as this MCP server. ChatGPT Web does not install or run Agent Reach directly. ChatGPT only calls the read-only MCP tools exposed by this service; those tools then call Agent Reach or the upstream tools that Agent Reach installs and checks.
+
+Current local deployment:
+
+- Runtime type: macOS user-level `launchd` service.
+- Runtime user: `shenzhiheng`.
+- MCP server path: `/Users/shenzhiheng/Documents/obsidian_repo/mcp-server`.
+- Agent Reach path: `/Users/shenzhiheng/Documents/obsidian_repo/mcp-server/.venv-agent-reach/bin/agent-reach`.
+- Upstream tools currently used by wrappers: `gh`, `yt-dlp`, and Jina Reader over HTTPS. If Jina Reader is unreachable from the MCP runtime, `read_url` falls back to a direct HTTP(S) fetch and marks the response as `source: "direct_fetch_fallback"`.
+
+The wrapper layer deliberately exposes narrow interfaces only:
+
+- `read_url(url, maxChars?)`
+- `youtube_transcript(url, languages?)`
+- `github_search(query, limit?)`
+- `web_search(query, limit?, site?)`
+- `youtube_search(query, limit?)`
+- `rss_read(feedUrl, limit?)`
+- `agent_reach_status()`
+
+It does not expose arbitrary shell execution, and it does not assume Agent Reach provides a universal `search` or `exec` command. If a capability is implemented by an upstream CLI, the handler calls that CLI through a whitelist with fixed arguments.
+
+For autonomous learning workflows, use the tools in this order:
+
+1. Discover sources with `web_search`, `youtube_search`, `github_search`, or `rss_read`.
+2. Read selected sources with `read_url` or `youtube_transcript`.
+3. Save distilled notes with the vault tools, for example `write_vault_file` or `append_vault_file`.
+
+Useful high-signal search patterns:
+
+```text
+web_search("MCP server best practices", 10, "modelcontextprotocol.io")
+web_search("AI agents tool use evaluation", 10, "arxiv.org")
+youtube_search("Obsidian MCP tutorial", 5)
+rss_read("https://hnrss.org/frontpage", 10)
+github_search("topic:mcp-server obsidian", 10)
+```
+
+Install or refresh Agent Reach in this MCP server runtime:
+
+```bash
+cd /Users/shenzhiheng/Documents/obsidian_repo/mcp-server
+python3.11 -m venv .venv-agent-reach
+.venv-agent-reach/bin/python -m pip install --upgrade pip
+.venv-agent-reach/bin/python -m pip install https://github.com/Panniantong/agent-reach/archive/main.zip
+.venv-agent-reach/bin/agent-reach install --env=auto --dry-run
+.venv-agent-reach/bin/agent-reach install --env=auto --safe
+PATH="/Users/shenzhiheng/Documents/obsidian_repo/mcp-server/.venv-agent-reach/bin:$PATH" .venv-agent-reach/bin/agent-reach doctor
+```
+
+`agent-reach install --safe` is preferred for this service because it reports missing system dependencies without blindly changing the host. If `doctor` reports missing optional channels such as `mcporter` or Exa, install and configure only the channels this MCP service actually needs.
+
+When Agent Reach or a required upstream CLI is unavailable, wrapper tools return structured JSON instead of throwing raw shell errors:
+
+```json
+{
+  "ok": false,
+  "error": "not_configured",
+  "message": "Agent Reach or required upstream CLI is not available in the MCP Server runtime."
+}
+```
 
 ## Setup
 
@@ -82,6 +156,86 @@ Authorization: Bearer your-long-random-token
 ## Restart after shutdown
 
 If the computer restarts, sleeps for a long time, or you close the terminal windows, start both processes again.
+
+One-command manual startup:
+
+```bash
+cd /Users/shenzhiheng/Documents/obsidian_repo/mcp-server
+npm run up
+```
+
+This command starts the local MCP server if needed, starts ngrok if needed, then prints the current ChatGPT MCP URL. The printed URL contains your MCP token; do not share screenshots or paste it into public places.
+
+Logs are written to:
+
+```text
+mcp-server.log
+ngrok.log
+```
+
+## Keep it running with launchd
+
+For long-running use on macOS, install the user-level `launchd` services. This starts the MCP server and ngrok when you log in, and restarts them if either process crashes.
+
+Install and start:
+
+```bash
+cd /Users/shenzhiheng/Documents/obsidian_repo/mcp-server
+npm run service:install
+```
+
+Check status:
+
+```bash
+cd /Users/shenzhiheng/Documents/obsidian_repo/mcp-server
+npm run service:status
+curl http://localhost:3000/health
+curl https://october-washed-android.ngrok-free.dev/health
+```
+
+Stop both background services:
+
+```bash
+cd /Users/shenzhiheng/Documents/obsidian_repo/mcp-server
+npm run service:stop
+```
+
+Start them again:
+
+```bash
+cd /Users/shenzhiheng/Documents/obsidian_repo/mcp-server
+npm run service:start
+```
+
+Remove the launchd services:
+
+```bash
+cd /Users/shenzhiheng/Documents/obsidian_repo/mcp-server
+npm run service:uninstall
+```
+
+launchd logs are written to:
+
+```text
+mcp-server.launchd.log
+mcp-server.launchd.err.log
+ngrok.launchd.log
+ngrok.launchd.err.log
+```
+
+If you use a free random ngrok URL, the URL can change after restart. This repository currently uses the stable reserved domain:
+
+```text
+https://october-washed-android.ngrok-free.dev
+```
+
+As long as that domain remains configured in your ngrok account, ChatGPT can keep using:
+
+```text
+https://october-washed-android.ngrok-free.dev/sse?token=your-token
+```
+
+Manual startup:
 
 Terminal 1: start the local MCP server:
 
