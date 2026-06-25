@@ -125,6 +125,16 @@ These tools must return structured JSON. If Agent Reach or an upstream CLI is mi
 }
 ```
 
+For MCP SDK versions that support structured tool output, every public tool should also declare an `outputSchema` in `tools/list` and return matching `structuredContent` from `tools/call`. Keep the human-readable `content` text for backward compatibility, but make `structuredContent` the source of truth for clients that can validate outputs.
+
+Minimum output schema coverage:
+
+- Vault read/search/list tools: `ok`, returned records, and `nextCursor` when paginated.
+- Vault mutation tools: `ok`, `path`, and `message`.
+- Binary write tools: `ok`, `path`, `bytesWritten`, `sha256`, and optional `mimeType`.
+- Runtime diagnostics: `ok`, `runtime`, `commands`, and `doctor` where applicable.
+- External discovery tools: `ok`, `query` or source URL/feed URL, result arrays or content fields, plus structured `error`, `message`, and `details` on failure.
+
 Generate `.env` locally:
 
 ```bash
@@ -230,6 +240,8 @@ curl http://localhost:3000/health
 Verify MCP with the SDK client when possible:
 
 - `client.listTools()` shows expected tool names.
+- Every public tool has an `outputSchema` when supported by the installed MCP SDK.
+- Tool calls return `structuredContent` matching the advertised `outputSchema`, while still keeping readable text content for older clients.
 - `get_vault_structure` excludes `.git`, `.obsidian`, and `mcp-server`.
 - `runtime_context` returns current local date, timezone, and year.
 - `web_search` can find a high-signal source, for example an arXiv result.

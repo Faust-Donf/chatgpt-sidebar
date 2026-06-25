@@ -28,6 +28,8 @@ mcp-server/dist/
 mcp-server/.venv-agent-reach/
 ```
 
+When implementing MCP tools, keep schemas in source code and rebuild generated files locally. Generated `dist/` output is a deployment artifact for the vault runtime, not part of this skill package.
+
 Recommended generic wiki structure:
 
 ```text

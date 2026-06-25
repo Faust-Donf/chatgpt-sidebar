@@ -45,6 +45,7 @@ This skill turns that bridge into a repeatable setup:
 | Let ChatGPT inspect a vault | Vault-scoped MCP read tools |
 | Let ChatGPT organize notes | Explicit write, append, move, delete tools |
 | Let ChatGPT discover new knowledge | Web, GitHub, YouTube, RSS discovery tools |
+| Let clients validate tool outputs | MCP `outputSchema` + `structuredContent` |
 | Connect ChatGPT to local files | ngrok + token-protected SSE endpoint |
 | Avoid leaking local state | Git ignores, path guards, secret boundaries |
 
@@ -81,6 +82,8 @@ The server can expose controlled vault tools:
 | `create_vault_directory` | Create folders for organization |
 | `runtime_context` | Return MCP server date, time, timezone, and runtime user |
 
+Modern MCP clients can consume these tools as structured outputs. The recommended server implementation declares `outputSchema` in `tools/list` and returns matching `structuredContent` from `tools/call`, while preserving readable text output for older clients.
+
 The server can also expose optional Agent Reach-backed discovery tools:
 
 | Tool | Purpose |
@@ -92,6 +95,8 @@ The server can also expose optional Agent Reach-backed discovery tools:
 | `rss_read` | Read RSS or Atom feeds |
 | `read_url` | Read one HTTP(S) page through Jina Reader or direct fallback |
 | `youtube_transcript` | Extract YouTube subtitles or auto-subtitles |
+
+Discovery tools should expose structured success and failure shapes, including `ok`, result arrays or content fields, and machine-readable `error`, `message`, and `details` fields when an upstream CLI or reader is unavailable.
 
 This is intentionally not arbitrary shell access. ChatGPT Web calls narrow MCP tools; those tools run in the MCP server runtime and call Agent Reach or upstream CLIs only through fixed handlers.
 
@@ -236,6 +241,12 @@ python3 ~/.codex/skills/.system/skill-creator/scripts/quick_validate.py ~/.codex
 ```
 
 This repository also runs a lightweight GitHub Actions workflow on every push to verify the skill package shape.
+
+When validating a generated MCP server, also check that:
+
+- `client.listTools()` shows `outputSchema` for every public tool.
+- representative calls such as `agent_reach_status`, `runtime_context`, and `list_vault_files` return `structuredContent`.
+- legacy text `content` remains present for clients that do not yet consume structured output.
 
 ## Star History
 
